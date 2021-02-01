@@ -1,1 +1,3 @@
-# fastapi-practice
+# FastAPI Practice
+
+Learning FastAPI and Pydantic
