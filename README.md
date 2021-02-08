@@ -42,3 +42,14 @@ Read the [docs](https://fastapi.tiangolo.com/tutorial/).
 4. Query parameters can be optional.
 
 5. The `Optional[...]` library is only used by the editor to help find errors in your code. It is not required by FastAPI.
+
+6. Non-default arguments to a function cannot be declared after arguments with defaults. i.e,:
+    ```python
+    def func(x='something', y='randomValue', a, b):
+        pass
+    ```
+    The above function definition is false. You can instead do something like this:
+    ```python
+    def func(a, b, x='something', y='randomValue'):
+        pass
+    ```

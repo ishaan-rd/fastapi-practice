@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Path
 from pydantic import BaseModel
 from typing import Optional, List
 
@@ -23,19 +23,19 @@ async def get_items(
         title="Query q",
         description="Random description for q",
         max_length=50,
-        alias="item-query"
+        alias="item-query",
         # 'item-query' is NOT a valid parameter variable
         # but can be used as an alias for 'q'
     ),
     z: list = Query(
         ["foo", "bar"],
-        deprecated=True
+        deprecated=True,
     )
 ):
     results = {
         "items": [
             {"item_id": 0, "item_name": "Set Dosa"},
-            {"item_id": 1, "item_name": "Vada"}
+            {"item_id": 1, "item_name": "Vada"},
         ]
     }
     try:
@@ -51,7 +51,14 @@ async def get_items(
 
 
 @my_app.get("/items/{item_id}")
-async def get_item_by_id(item_id: int):
+async def get_item_by_id(
+    q: str,
+    item_id: int = Path(
+        ...,  # Ellipsis - acts as placeholder and enforces requirement
+        description="The id of the item to get",
+        ge=1,  # item_id has to be an integer greater than or equal to 1
+    ),
+):
     return {"item-id": item_id, "message": "Pending work for get item"}
 
 
