@@ -48,7 +48,7 @@ Read the [docs](https://fastapi.tiangolo.com/tutorial/).
     def func(x='something', y='randomValue', a, b):
         pass
     ```
-    The above function definition is false. You can instead do something like this:
+    The above function definition throws a SyntaxError. You can instead do something like this:
     ```python
     def func(a, b, x='something', y='randomValue'):
         pass
