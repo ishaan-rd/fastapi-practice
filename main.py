@@ -1,6 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 
 class Item(BaseModel):
     name: str
@@ -17,8 +17,37 @@ async def home():
 
 
 @my_app.get("/items/")
-async def get_items():
-    return {"message": "Pending work for get all items"}
+async def get_items(
+    q: Optional[List[str]] = Query(
+        None,
+        title="Query q",
+        description="Random description for q",
+        max_length=50,
+        alias="item-query"
+        # 'item-query' is NOT a valid parameter variable
+        # but can be used as an alias for 'q'
+    ),
+    z: list = Query(
+        ["foo", "bar"],
+        deprecated=True
+    )
+):
+    results = {
+        "items": [
+            {"item_id": 0, "item_name": "Set Dosa"},
+            {"item_id": 1, "item_name": "Vada"}
+        ]
+    }
+    try:
+        results.update({
+            "query q": q,
+            "query z": z,
+        })
+    except Exception as e:
+        message = f"Error occurred: {e}"
+        print(message)
+    
+    return results
 
 
 @my_app.get("/items/{item_id}")
