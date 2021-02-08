@@ -26,3 +26,19 @@ Learning FastAPI and Pydantic
     uvicorn main:my_app --reload
     ```
     The server will be started in `localhost:8000`. You can access your API by going to `localhost:8000/docs` or `localhost:8000/redoc`.
+
+---
+## Key Points
+Read the [docs](https://fastapi.tiangolo.com/tutorial/).
+
+1. Important [first steps](https://fastapi.tiangolo.com/tutorial/first-steps/).
+
+2. Path parameters are always required - cannot be optional.
+
+3. Order of the `get` methods matter.
+
+    Example: Because path operations are evaluated in order, you need to make sure that the path for `/users/me` is declared before the one for `/users/{user_id}`. Otherwise, the path for `/users/{user_id}` would match also for `/users/me`, "thinking" that it's receiving a parameter `user_id` with a value of `"me"`.
+
+4. Query parameters can be optional.
+
+5. The `Optional[...]` library is only used by the editor to help find errors in your code. It is not required by FastAPI.
