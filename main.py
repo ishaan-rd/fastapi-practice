@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query, Path
+from fastapi import FastAPI, Query, Path, Body
 from pydantic import BaseModel
 from typing import Optional, List
 
@@ -10,6 +10,7 @@ class Item(BaseModel):
 
 
 my_app = FastAPI()
+
 
 @my_app.get("/")
 async def home():
@@ -55,7 +56,7 @@ async def get_item_by_id(
     q: str,
     item_id: int = Path(
         ...,  # Ellipsis - acts as placeholder and enforces requirement
-        description="The id of the item to get",
+        title="The ID of the item to get",
         ge=1,  # item_id has to be an integer greater than or equal to 1
     ),
 ):
@@ -69,3 +70,36 @@ async def create_item(item: Item):
         price_with_tax = item.price * (1 + item.tax/100)
         item_dict.update({"price_with_tax": price_with_tax})
     return item_dict
+
+
+@my_app.put("/items/{item_id}/")
+async def update_item(
+    q: Optional[List[str]] = Query(
+        None,
+        alias="item-query",
+        max_length=50,
+        description="Random description for q",
+    ),
+    item: Optional[Item] = Body(
+        None,
+        embed=True,  # This enforces request body to use "items" key
+    )
+    item_id: int = Path(
+        ...,
+        ge=1,
+        title="The ID of the item to get",
+    ),
+    importance: int = Body(..., ge=1),
+):
+    results = {"item-id": item_id}
+    try:
+        results.update({
+            "Query q": q,
+            "item": item,
+            "importance": importance
+        })
+    except Exception as e:
+        message = f'Error occurred: {e}'
+        print(message)
+    
+    return results
