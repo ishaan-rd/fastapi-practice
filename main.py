@@ -2,6 +2,7 @@ from fastapi import FastAPI, Query, Path, Body
 from pydantic import BaseModel
 from typing import Optional, List
 
+
 class Item(BaseModel):
     name: str
     description: Optional[str] = None
@@ -47,7 +48,7 @@ async def get_items(
     except Exception as e:
         message = f"Error occurred: {e}"
         print(message)
-    
+
     return results
 
 
@@ -67,7 +68,7 @@ async def get_item_by_id(
 async def create_item(item: Item):
     item_dict = item.dict()
     if item.tax:
-        price_with_tax = item.price * (1 + item.tax/100)
+        price_with_tax = item.price * (1 + item.tax / 100)
         item_dict.update({"price_with_tax": price_with_tax})
     return item_dict
 
@@ -83,7 +84,7 @@ async def update_item(
     item: Optional[Item] = Body(
         None,
         embed=True,  # This enforces request body to use "items" key
-    )
+    ),
     item_id: int = Path(
         ...,
         ge=1,
@@ -101,5 +102,5 @@ async def update_item(
     except Exception as e:
         message = f'Error occurred: {e}'
         print(message)
-    
+
     return results
