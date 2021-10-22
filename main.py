@@ -1,6 +1,23 @@
-from fastapi import FastAPI, Query, Path, Body
+from fastapi import FastAPI, Query, Path, Body, Request, Response
 from pydantic import BaseModel
 from typing import Optional, List
+from prometheus_client import Counter, Histogram
+import prometheus_client
+import time
+
+
+# FastAPI's Response will append charset=utf-8 to content-type automatically
+CONTENT_TYPE_LATEST = str('text/plain; version=0.0.4')
+
+# Set up prometheus metric variables just once
+REQUEST_COUNT = Counter(
+    "request_count", "Count number of requests received",
+    ["app_name", "method", "endpoint", "http_status"]
+)
+REQUEST_LATENCY = Histogram(
+    "request_latency_seconds", "Request Latency",
+    ["app_name", "endpoint"]
+)
 
 
 class Item(BaseModel):
@@ -11,6 +28,40 @@ class Item(BaseModel):
 
 
 my_app = FastAPI()
+
+
+@my_app.middleware("http")
+async def calc_metrics(request: Request, call_next):
+    response = Response("Internal server error!!", status_code=500)
+    try:
+        start_time = time.time()
+        response = await call_next(request)
+        resp_time = time.time() - start_time
+
+        REQUEST_LATENCY.labels(
+            'dm-storage-systems-api',
+            request.url.path
+        ).observe(resp_time)
+
+        REQUEST_COUNT.labels(
+            'dm-storage-systems-api',
+            request.method,
+            request.url.path,
+            response.status_code
+        ).inc()
+
+    except Exception as e:
+        print(f"Error initializing metrics export: {str(e)}")
+    return response
+
+
+
+@my_app.get("/metrics/")
+async def get_metrics():
+    return Response(
+        prometheus_client.generate_latest(),
+        media_type=CONTENT_TYPE_LATEST
+    )
 
 
 @my_app.get("/")
